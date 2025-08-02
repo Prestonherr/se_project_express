@@ -16,10 +16,10 @@ const getItems = (req, res) => {
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user?._id || "688916f693fa1e1d38da47b4";
+  const owner = req.user?._id || "64a54f9d9a4e5d3c8e0a1234";
 
   ClothingItem.create({ name, weather, imageUrl, owner })
-    .then((item) => res.status(201).send({ data: item }))
+    .then((item) => res.status(201).send(item))
     .catch((err) => {
       console.error(err.name, err.message);
       if (err.name === "ValidationError") {
@@ -33,8 +33,12 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then(() => res.status(200).send({ message: err.message }))
+    .orFail(() => {
+      const error = new Error("Clothing item not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
+    .then(() => res.status(200).send({ message: "Successfully deleted" }))
     .catch((err) => {
       console.error(err.name, err.message);
       if (err.name === "CastError") {
@@ -52,6 +56,7 @@ const likeItem = (req, res) => {
 
   ClothingItem.findByIdAndUpdate(
     itemId,
+
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )

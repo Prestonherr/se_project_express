@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const User = require("../models/users");
 const {
   BAD_REQUEST,
@@ -10,7 +11,9 @@ const getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -20,27 +23,45 @@ const createUser = (req, res) => {
   User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      console.error(err);
+      console.error(err.name, err.message);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid data provided for user" });
       }
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
 const getUser = (req, res) => {
   const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(BAD_REQUEST).send({ message: "Invalid user ID format" });
+  }
+
   User.findById(userId)
-    .orFail()
+    .orFail(() => {
+      const error = new Error("User not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        res.status(404).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        res.status(400).send({ message: err.message });
+      console.error(err.name, err.message);
+      if (err.name === "CastError") {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid user ID format" });
       }
-      return res.status(500).send({ message: err.message });
+      if (err.statusCode === NOT_FOUND) {
+        return res.status(NOT_FOUND).send({ message: err.message });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
