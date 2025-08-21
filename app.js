@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const routes = require("./routes");
+const { createUser, loginUser } = require("./controllers/users");
+const cors = require("cors");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -13,12 +15,10 @@ mongoose
   .catch(console.error);
 
 app.use(express.json());
-app.use((req, res, next) => {
-  req.user = {
-    _id: "64a54f9d9a4e5d3c8e0a1234",
-  };
-  next();
-});
+app.use(cors());
+
+app.post("/signin", loginUser);
+app.post("/signup", createUser);
 
 app.use(routes);
 
