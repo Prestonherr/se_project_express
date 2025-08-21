@@ -3,9 +3,6 @@ const { NOT_FOUND } = require("../utils/errors");
 const auth = require("../middlewares/auth");
 const { getItems } = require("../controllers/clothingItems");
 
-// const clothingItem = require("./clothingItems");
-// const usersRouter = require("./users");
-
 router.get("/items", getItems);
 
 router.use(auth);

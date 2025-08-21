@@ -19,7 +19,7 @@ const getItems = (req, res) => {
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user?._id || "64a54f9d9a4e5d3c8e0a1234";
+  const owner = req.user._id;
 
   ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => res.status(201).send(item))
@@ -37,7 +37,7 @@ const createItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail(() => {
       const error = new Error("Clothing item not found");
       error.statusCode = NOT_FOUND;

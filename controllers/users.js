@@ -8,6 +8,7 @@ const {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
+  CONFLICT,
 } = require("../utils/errors");
 
 const getUsers = (req, res) => {
@@ -44,7 +45,7 @@ const createUser = (req, res) => {
       console.error(err.name, err.code, err.message);
 
       if (err && err.code === 11000) {
-        return res.status(409).send({ message: "Email already in use" });
+        return res.status(CONFLICT).send({ message: "Email already in use" });
       }
 
       if (err.name === "ValidationError") {
