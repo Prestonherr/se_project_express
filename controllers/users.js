@@ -81,7 +81,7 @@ const getCurrentUser = (req, res) => {
           .send({ message: "Invalid user ID format" });
       }
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res.status(NOT_FOUND).send({ message: "User not found" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
@@ -141,7 +141,7 @@ const updateCurrentUser = (req, res) => {
       }
 
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res.status(NOT_FOUND).send({ message: "User not found" });
       }
 
       return res

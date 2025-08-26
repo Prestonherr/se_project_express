@@ -26,7 +26,9 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error(err.name, err.message);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid data provided for creating an item" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
@@ -56,10 +58,14 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err.name, err.message);
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid data provided for deleting an item" });
       }
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "Clothing item not found" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
@@ -85,10 +91,14 @@ const likeItem = (req, res) => {
     .catch((err) => {
       console.error(err.name, err.message);
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid data provided for liking an item" });
       }
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "Clothing item not found" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
@@ -113,10 +123,14 @@ const dislikeItem = (req, res) => {
     .catch((err) => {
       console.error(err.name, err.message);
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid data provided for disliking an item" });
       }
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "Clothing item not found" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
