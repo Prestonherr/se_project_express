@@ -6,29 +6,25 @@ const User = require("../models/users");
 const {
   BAD_REQUEST,
   NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
   CONFLICT,
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError,
+  ConflictError,
 } = require("../utils/errors");
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
+    .catch((err) => next(err));
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Email and password are required" });
+    return next(new BadRequestError("Email and password are required"));
   }
 
   bcrypt
@@ -42,60 +38,44 @@ const createUser = (req, res) => {
       return res.status(201).send(userSafe);
     })
     .catch((err) => {
-      console.error(err.name, err.code, err.message);
-
       if (err && err.code === 11000) {
-        return res.status(CONFLICT).send({ message: "Email already in use" });
+        return next(new ConflictError("Email already in use"));
       }
-
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid data provided for user" });
+        return next(new BadRequestError("Invalid data provided for user"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return res.status(BAD_REQUEST).send({ message: "Invalid user ID format" });
+    return next(new BadRequestError("Invalid user ID format"));
   }
 
   User.findById(userId)
     .orFail(() => {
-      const error = new Error("User not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      throw new NotFoundError("User not found");
     })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      console.error(err.name, err.message);
       if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid user ID format" });
+        return next(new BadRequestError("Invalid user ID format"));
       }
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
-const loginUser = (req, res) => {
+const loginUser = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Email and password are required" });
+    return next(new BadRequestError("Email and password are required"));
   }
 
   User.findUserByCredentials(email, password)
@@ -106,14 +86,11 @@ const loginUser = (req, res) => {
       return res.status(200).send({ token });
     })
     .catch((err) => {
-      console.error(err.name, err.message);
-      return res
-        .status(UNAUTHORIZED)
-        .send({ message: "Incorrect email or password" });
+      return next(new UnauthorizedError("Incorrect email or password"));
     });
 };
 
-const updateCurrentUser = (req, res) => {
+const updateCurrentUser = (req, res, next) => {
   const { name, avatar } = req.body;
 
   const updates = {};
@@ -126,27 +103,19 @@ const updateCurrentUser = (req, res) => {
     context: "query",
   })
     .orFail(() => {
-      const error = new Error("User not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      throw new NotFoundError("User not found");
     })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      console.error(err.name, err.message);
-
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid data provided for user update" });
+        return next(
+          new BadRequestError("Invalid data provided for user update")
+        );
       }
-
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
-
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
