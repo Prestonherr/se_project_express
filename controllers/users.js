@@ -4,21 +4,12 @@ const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 const User = require("../models/users");
 const {
-  BAD_REQUEST,
   NOT_FOUND,
-  UNAUTHORIZED,
-  CONFLICT,
   BadRequestError,
   NotFoundError,
   UnauthorizedError,
   ConflictError,
 } = require("../utils/errors");
-
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => next(err));
-};
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
@@ -85,9 +76,7 @@ const loginUser = (req, res, next) => {
       });
       return res.status(200).send({ token });
     })
-    .catch((err) => {
-      return next(new UnauthorizedError("Incorrect email or password"));
-    });
+    .catch(() => next(new UnauthorizedError("Incorrect email or password")));
 };
 
 const updateCurrentUser = (req, res, next) => {
@@ -120,7 +109,6 @@ const updateCurrentUser = (req, res, next) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   getCurrentUser,
   loginUser,

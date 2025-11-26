@@ -1,8 +1,6 @@
 const ClothingItem = require("../models/clothingItems");
 const {
-  BAD_REQUEST,
   NOT_FOUND,
-  FORBIDDEN,
   BadRequestError,
   NotFoundError,
   ForbiddenError,
