@@ -24,12 +24,6 @@ Backend for WTWR
 
 **Dev tooling**: Nodemon, ESLint, Prettier
 
-**Deployment**
-
-- Live frontend demo: https://wtwr.joe.dj
-- Backend repository: https://github.com/Prestonherr/se_project_express.git
-- Frontend repository: https://github.com/Prestonherr/se_project_react.git
-
 ## 👨‍💻 Author
 
 **Preston Herr**
